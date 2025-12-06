@@ -1,101 +1,152 @@
-// 15634Fernando.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <string>
-#include <vector>
-
 using namespace std;
 
 class Book {
-protected:
+private:
     string title;
     string author;
-    string ISBN;
+    string isbn;
     bool available;
     string dateAdded;
 
 public:
-    Book(string t, string a, string i, bool av, string date) :
-        title(t), author(a), ISBN(i), available(av), dateAdded(date) {
+    Book() {}
+
+    Book(string t, string a, string i, bool av, string date)
+        : title(t), author(a), isbn(i), available(av), dateAdded(date) {
     }
 
-    virtual void displayDetails() const {
+    string getTitle() const { return title; }
+    string getIsbn() const { return isbn; }
+    bool isAvailable() const { return available; }
+
+    void print() const {
         cout << "Title: " << title << endl;
         cout << "Author: " << author << endl;
-        cout << "ISBN: " << ISBN << endl;
-        cout << "Available: " << (available ? "Yes" : "No") << endl;
-        cout << "Date Added: " << dateAdded << endl;
+        cout << "ISBN: " << isbn << endl;
+        cout << "Available: " << (available ? "Available" : "Not available") << endl;
+        cout << "DateAdded: " << dateAdded << endl;
     }
 
     void borrowBook() {
         if (available) {
             available = false;
-            cout << "You borrowed \"" << title << "\".\n";
+            cout << "You borrowed \"" << title << "\"." << endl;
         }
         else {
-            cout << "\"" << title << "\" is not available.\n";
+            cout << "Sorry, \"" << title << "\" is not available." << endl;
         }
     }
 };
 
-class HardcopyBook : public Book {
-private:
-    string shelfNumber;
-
-public:
-    HardcopyBook(string t, string a, string i, bool av, string date, string shelf) :
-        Book(t, a, i, av, date), shelfNumber(shelf) {
+// bubble sort by title
+void sortByTitle(Book arr[], int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - 1 - i; j++) {
+            if (arr[j].getTitle() > arr[j + 1].getTitle()) {
+                Book temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
     }
+}
 
-    void displayDetails() const override {
-        Book::displayDetails();
-        cout << "Shelf Number: " << shelfNumber << endl;
+void printArray(const string& label, Book arr[], int size) {
+    cout << "\n" << label << endl;
+    cout << "-------------------------" << endl;
+    for (int i = 0; i < size; i++) {
+        cout << "Book " << (i + 1) << ":" << endl;
+        arr[i].print();
+        cout << endl;
     }
-};
+}
 
-class EBook : public Book {
-private:
-    string licenseEndDate;
-
-public:
-    EBook(string t, string a, string i, bool av, string date, string licenseDate) :
-        Book(t, a, i, av, date), licenseEndDate(licenseDate) {
+Book* findBookByIsbn(Book arr[], int size, const string& isbn) {
+    for (int i = 0; i < size; i++) {
+        if (arr[i].getIsbn() == isbn) {
+            return &arr[i];
+        }
     }
-
-    void displayDetails() const override {
-        Book::displayDetails();
-        cout << "License End Date: " << licenseEndDate << endl;
-    }
-};
+    return nullptr;
+}
 
 int main() {
-    vector<HardcopyBook> hardbooks = {
-        HardcopyBook("Chainsaw Man Vol. 01", "Tatsuki Fujimoto", "9781974709939", true, "2025-11-01", "A12"),
-        HardcopyBook("The Maze Runner", "James Dashner", "9780385737951", true, "2025-11-01", "B7")
-    };
+    const int SIZE = 3;
 
-    vector<EBook> ebooks = {
-        EBook("Percy Jackson and the Sea of Monsters", "Rick Riordan", "9780141381497", true, "2025-11-01", "2026-12-31"),
-        EBook("Attack on Titan Vol. 01", "Hajime Isayama", "9781612626154", true, "2025-11-01", "2025-11-30"),
-        EBook("Jujutsu Kaisen Vol. 01", "Gege Akutami", "9781974720149", true, "2025-11-01", "2025-12-31")
-    };
+    // correct books
+    Book b1("Chainsaw Man Vol. 01", "Tatsuki Fujimoto", "9781974709939", true, "2025-11-01");
+    Book b2("The Maze Runner", "James Dashner", "9780385737951", true, "2025-11-01");
+    Book b3("Attack on Titan Vol. 01", "Hajime Isayama", "9781612626154", true, "2025-11-01");
 
-    cout << "Hardcopy Books:\n";
-    for (const auto& book : hardbooks) {
-        book.displayDetails();
-        cout << endl;
+    // incorrect books – used only to show wrong initialisation
+    Book wrong1("Chainsaw Man Vol. 01", "Tatsuki Fujimoto", "ABC9939", true, "01-11-2025");
+    Book wrong2("The Maze Runner", "", "9780385737951", true, "2025/11/01");
+    Book wrong3("Attack on Titan Vol. 01", "Hajime Isayama", "97X1612626154", true, "11-2025");
+
+    cout << "=== Incorrect book information examples ===" << endl;
+    wrong1.print();
+    cout << endl;
+    wrong2.print();
+    cout << endl;
+    wrong3.print();
+    cout << "\n===========================================" << endl;
+
+    // Arrays for sorting tests
+    Book arrAsc[SIZE] = { b3, b1, b2 }; // already ascending by title
+    Book arrDesc[SIZE] = { b2, b1, b3 }; // descending
+    Book arrMixed[SIZE] = { b1, b3, b2 }; // mixed
+
+    // BEFORE SORT
+    printArray("Array 1 - Ascending order BEFORE sort", arrAsc, SIZE);
+    printArray("Array 2 - Descending order BEFORE sort", arrDesc, SIZE);
+    printArray("Array 3 - Mixed order BEFORE sort", arrMixed, SIZE);
+
+    // SORT
+    sortByTitle(arrAsc, SIZE);
+    sortByTitle(arrDesc, SIZE);
+    sortByTitle(arrMixed, SIZE);
+
+    // AFTER SORT
+    printArray("Array 1 - Ascending order AFTER sort", arrAsc, SIZE);
+    printArray("Array 2 - Descending order AFTER sort", arrDesc, SIZE);
+    printArray("Array 3 - Mixed order AFTER sort", arrMixed, SIZE);
+
+    // Simple interactive menu using one of the arrays (sorted mixed array)
+    cout << "\n=== Welcome to Fernando's Test Library ===" << endl;
+    string choice;
+    string inputIsbn;
+
+    while (true) {
+        cout << "\n1 - Show all books (sorted)" << endl;
+        cout << "2 - Borrow a book by ISBN" << endl;
+        cout << "0 - Exit test program" << endl;
+        cout << "Your choice: ";
+        getline(cin, choice);
+
+        if (choice == "0") {
+            cout << "Exiting test program." << endl;
+            break;
+        }
+        else if (choice == "1") {
+            printArray("Current books (sorted by title)", arrMixed, SIZE);
+        }
+        else if (choice == "2") {
+            cout << "Type ISBN to borrow: ";
+            getline(cin, inputIsbn);
+            Book* found = findBookByIsbn(arrMixed, SIZE, inputIsbn);
+            if (found == nullptr) {
+                cout << "Book not found." << endl;
+            }
+            else {
+                found->borrowBook();
+            }
+        }
+        else {
+            cout << "Invalid option, try again." << endl;
+        }
     }
-
-    cout << "E-Books:\n";
-    for (const auto& book : ebooks) {
-        book.displayDetails();
-        cout << endl;
-    }
-
-    // Example borrowing books
-    hardbooks[0].borrowBook();
-    ebooks[0].borrowBook();
 
     return 0;
 }
